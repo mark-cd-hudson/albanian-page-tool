@@ -52,7 +52,7 @@ export class ClaudeService {
     return [];
   }
 
-  async splitIntoSentences(paragraphText: string): Promise<string[]> {
+  async splitIntoSentences(paragraphText: string, language: string): Promise<string[]> {
     // Use Haiku 4.5 for text-only tasks (faster and more cost-effective)
     const message = await this.client.messages.create({
       model: 'claude-haiku-4-5',
@@ -60,7 +60,7 @@ export class ClaudeService {
       messages: [
         {
           role: 'user',
-          content: `Split this Albanian text into individual sentences. Return each sentence on a new line. Only return the sentences, nothing else.
+          content: `Split this ${language} text into individual sentences. Return each sentence on a new line. Only return the sentences, nothing else.
 
 Text: "${paragraphText}"`
         }
@@ -78,7 +78,7 @@ Text: "${paragraphText}"`
     return [paragraphText]; // Fallback to treating whole paragraph as one sentence
   }
 
-  async translateSentenceAndWords(sentence: string): Promise<Sentence> {
+  async translateSentenceAndWords(sentence: string, sourceLanguage: string, targetLanguage: string): Promise<Sentence> {
     // Use Haiku 4.5 for text-only tasks (faster and more cost-effective)
     const message = await this.client.messages.create({
       model: 'claude-haiku-4-5',
@@ -86,17 +86,17 @@ Text: "${paragraphText}"`
       messages: [
         {
           role: 'user',
-          content: `Translate this Albanian sentence to English and provide the meaning of each word in context.
+          content: `Translate this ${sourceLanguage} sentence to ${targetLanguage} and provide the meaning of each word in context.
 
 Sentence: "${sentence}"
 
 Return a JSON object with this structure:
 {
-  "translation": "English translation of the full sentence",
+  "translation": "${targetLanguage} translation of the full sentence",
   "words": [
     {
-      "word": "Albanian word",
-      "meaning": "meaning in this context"
+      "word": "${sourceLanguage} word",
+      "meaning": "meaning in this context in ${targetLanguage}"
     }
   ]
 }`
@@ -147,14 +147,14 @@ Return a JSON object with this structure:
     };
   }
 
-  async processParagraphsConcurrently(paragraphTexts: string[]): Promise<Paragraph[]> {
+  async processParagraphsConcurrently(paragraphTexts: string[], sourceLanguage: string, targetLanguage: string): Promise<Paragraph[]> {
     const paragraphPromises = paragraphTexts.map(async (paragraphText) => {
       // Split paragraph into sentences
-      const sentenceTexts = await this.splitIntoSentences(paragraphText);
+      const sentenceTexts = await this.splitIntoSentences(paragraphText, sourceLanguage);
       
       // Process all sentences in this paragraph concurrently
       const sentencePromises = sentenceTexts.map(sentenceText => 
-        this.translateSentenceAndWords(sentenceText)
+        this.translateSentenceAndWords(sentenceText, sourceLanguage, targetLanguage)
       );
       
       const sentences = await Promise.all(sentencePromises);

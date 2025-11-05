@@ -1,0 +1,32 @@
+export const COMMON_LANGUAGES = [
+  'Albanian',
+  'Arabic',
+  'Chinese (Mandarin)',
+  'Czech',
+  'Danish',
+  'Dutch',
+  'Finnish',
+  'French',
+  'German',
+  'Greek',
+  'Hebrew',
+  'Hindi',
+  'Hungarian',
+  'Italian',
+  'Japanese',
+  'Korean',
+  'Norwegian',
+  'Polish',
+  'Portuguese',
+  'Romanian',
+  'Russian',
+  'Spanish',
+  'Swedish',
+  'Thai',
+  'Turkish',
+  'Ukrainian',
+  'Vietnamese',
+];
+
+export const DEFAULT_NATIVE_LANGUAGE = 'English';
+

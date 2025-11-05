@@ -28,12 +28,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <div className="w-80 bg-gray-50 border-r border-gray-200 flex flex-col h-screen">
       <div className="p-4 border-b border-gray-200">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Page History</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Pages</h2>
         <button
           onClick={onNewPage}
           className="w-full py-2 px-4 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
         >
-          + New Page
+          + Add Page
         </button>
       </div>
 
@@ -87,6 +87,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       ...
                     </div>
                     <div className="text-xs text-gray-500 mt-1">
+                      <span className="inline-block px-1.5 py-0.5 bg-indigo-100 text-indigo-700 rounded text-xs font-medium mr-1">
+                        {page.language}
+                      </span>
+                      {page.pageNumber && `p.${page.pageNumber} • `}
                       {formatDate(page.timestamp)}
                     </div>
                     <div className="text-xs text-gray-400 mt-1">

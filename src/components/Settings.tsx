@@ -1,20 +1,29 @@
 import React, { useState } from "react";
+import { AppSettings } from "../types";
+import { COMMON_LANGUAGES, DEFAULT_NATIVE_LANGUAGE } from "../constants";
 
 interface SettingsProps {
-  apiKey: string;
-  onSaveApiKey: (apiKey: string) => Promise<void>;
+  settings: AppSettings;
+  onSaveSettings: (settings: AppSettings) => Promise<void>;
   onClose: () => void;
 }
 
 export const Settings: React.FC<SettingsProps> = ({
-  apiKey,
-  onSaveApiKey,
+  settings,
+  onSaveSettings,
   onClose,
 }) => {
-  const [newApiKey, setNewApiKey] = useState(apiKey);
+  const [newApiKey, setNewApiKey] = useState(settings.apiKey);
+  const [nativeLanguage, setNativeLanguage] = useState(
+    settings.nativeLanguage || DEFAULT_NATIVE_LANGUAGE
+  );
 
   const handleSave = async () => {
-    await onSaveApiKey(newApiKey);
+    await onSaveSettings({
+      apiKey: newApiKey,
+      nativeLanguage,
+      recentLanguages: settings.recentLanguages,
+    });
     onClose();
   };
 
@@ -52,6 +61,27 @@ export const Settings: React.FC<SettingsProps> = ({
           </div>
 
           <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Native Language (Translation Target)
+              </label>
+              <select
+                value={nativeLanguage}
+                onChange={(e) => setNativeLanguage(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+              >
+                <option value="English">English</option>
+                {COMMON_LANGUAGES.map((lang) => (
+                  <option key={lang} value={lang}>
+                    {lang}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-2 text-sm text-gray-500">
+                Pages will be translated into this language.
+              </p>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Anthropic API Key

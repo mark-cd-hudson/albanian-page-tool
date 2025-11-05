@@ -1,14 +1,19 @@
 /**
  * Compress an image data URL to reduce storage size
- * Resizes to max 800px width and compresses to JPEG with quality 0.7
+ * @param dataUrl - The image data URL to compress
+ * @param maxWidth - Maximum width in pixels (default: 800)
+ * @param quality - JPEG quality 0-1 (default: 0.7)
  */
-export const compressImage = (dataUrl: string): Promise<string> => {
+export const compressImage = (
+  dataUrl: string,
+  maxWidth: number = 800,
+  quality: number = 0.7
+): Promise<string> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
     
     img.onload = () => {
-      // Calculate new dimensions (max width 800px)
-      const maxWidth = 800;
+      // Calculate new dimensions
       let width = img.width;
       let height = img.height;
       
@@ -30,8 +35,8 @@ export const compressImage = (dataUrl: string): Promise<string> => {
       
       ctx.drawImage(img, 0, 0, width, height);
       
-      // Convert to JPEG with compression (quality 0.7)
-      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+      // Convert to JPEG with compression
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
       
       console.log('Image compressed:', {
         originalSize: dataUrl.length,

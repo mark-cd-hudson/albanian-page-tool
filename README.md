@@ -1,15 +1,18 @@
-# Albanian Page Tool
+# Language Learning Tool
 
-A React SPA for learning Albanian by reading books. Upload images of book pages and get instant translations and word meanings.
+A React SPA for learning any language by reading books. Upload images of book pages and get instant translations and word meanings powered by Claude AI.
 
 ## Features
 
-- 📷 **Image Upload**: Upload images of Albanian book pages
+- 🌍 **Multi-Language Support**: Learn any language with AI-powered translations
+- 📷 **Image Upload**: Upload images of book pages in any language
 - 🤖 **AI-Powered Extraction**: Uses Claude AI to extract text from images
 - 🔤 **Word-by-Word Translation**: Get meanings for every word in context
 - 💬 **Sentence Translation**: See full sentence translations
-- 📚 **Page History**: Keep track of all uploaded pages
-- 💾 **Local Storage**: All data stored locally in your browser
+- 📚 **Book Management**: Organize pages by book with title, author, and page numbers
+- 🎯 **Custom Native Language**: Set your preferred translation target language
+- 📖 **Page History**: Keep track of all uploaded pages with language tags
+- 💾 **IndexedDB Storage**: All data stored locally with generous storage limits
 - 🔑 **Custom API Key**: Use your own Anthropic API key
 - 🎨 **Modern UI**: Clean, beautiful, and responsive design
 
@@ -38,13 +41,18 @@ npm run dev
 
 4. Click the settings icon and enter your Anthropic API key
 
+5. (Optional) Set your native language in settings (default is English)
+
 ### Usage
 
 1. **Set up your API key**: Click the settings icon in the top right and enter your Anthropic API key
-2. **Upload an image**: Click "Choose Image" and select a photo of a book page
-3. **Wait for processing**: The app will extract text, translate sentences, and analyze words
-4. **Tap words**: Click on any word to see its meaning and sentence translation in a bottom sheet
-5. **View history**: Access previously uploaded pages from the sidebar
+2. **Configure settings**: Set your native language (the language you want translations in)
+3. **Upload an image**: Click "Choose Image" and select a photo of a book page
+4. **Select source language**: Choose the language of the book you're reading
+5. **(Optional) Add book info**: Create or select a book and specify page number
+6. **Wait for processing**: The app will extract text, translate sentences, and analyze words
+7. **Tap words**: Click on any word to see its meaning and sentence translation in a bottom sheet
+8. **View history**: Access previously uploaded pages from the sidebar, filtered by language
 
 ## Building for Production
 
@@ -61,8 +69,8 @@ The built files will be in the `dist` directory.
 - **Tailwind CSS** for styling
 - **Anthropic Claude API** for AI processing
   - Claude Sonnet 4.5 for image text extraction
-  - Claude Haiku 4.5 for translations (faster and more cost-effective)
-- **Local Storage** for data persistence
+  - Claude Haiku 4.5 for translations and sentence splitting (faster and more cost-effective)
+- **IndexedDB** for data persistence with systematic migration system
 
 ## Notes
 
@@ -71,7 +79,14 @@ The built files will be in the `dist` directory.
 - **Page images are automatically compressed** - images are resized to 800px width and compressed to reduce storage usage
 - IndexedDB provides generous storage limits (hundreds of MB to GBs depending on browser)
 - The app keeps up to 50 most recent pages
+- **Database migrations** - Schema changes are handled automatically via a systematic migration system
 - For production use, consider implementing a backend proxy to avoid exposing API keys in the browser
+
+## Development
+
+### Database Migrations
+
+The app uses a systematic migration system for IndexedDB schema changes. See [`src/services/migrations/README.md`](src/services/migrations/README.md) for details on how to add new migrations.
 
 ## License
 

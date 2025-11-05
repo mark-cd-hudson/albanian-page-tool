@@ -21,24 +21,8 @@ export const TextDisplay: React.FC<TextDisplayProps> = ({
 
   return (
     <div className="h-full overflow-y-auto pb-64">
-      {/* Image Preview - only if available */}
-      {page.imageDataUrl && (
-        <div className="bg-gray-100 p-4 border-b border-gray-200">
-          <img
-            src={page.imageDataUrl}
-            alt="Uploaded page"
-            className="max-w-full h-auto mx-auto rounded-lg shadow-md"
-            style={{ maxHeight: "300px" }}
-          />
-        </div>
-      )}
-
       {/* Text Content - Continuous */}
       <div className="max-w-4xl mx-auto p-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">
-          Extracted Text
-        </h2>
-
         <div className="text-lg leading-relaxed text-gray-900 space-y-4">
           {page.paragraphs.map((paragraph, paragraphIdx) => (
             <p key={paragraphIdx}>
@@ -73,6 +57,13 @@ export const TextDisplay: React.FC<TextDisplayProps> = ({
             </p>
           ))}
         </div>
+
+        {/* Page Number */}
+        {page.pageNumber && (
+          <div className="mt-8 text-center text-gray-500 text-sm">
+            Page {page.pageNumber}
+          </div>
+        )}
       </div>
     </div>
   );
