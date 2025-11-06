@@ -54,7 +54,28 @@ npm run dev
 7. **Tap words**: Click on any word to see its meaning and sentence translation in a bottom sheet
 8. **View history**: Access previously uploaded pages from the sidebar, filtered by language
 
-## Building for Production
+## Deployment
+
+### GitHub Pages
+
+This app is configured for automatic deployment to GitHub Pages:
+
+1. **Automatic Deployment**: Every push to the `main` branch automatically triggers a deployment via GitHub Actions
+2. **Manual Deployment**: You can also manually deploy by running:
+   ```bash
+   npm run deploy
+   ```
+
+#### First-time Setup
+
+1. Go to your repository on GitHub
+2. Navigate to **Settings** → **Pages**
+3. Under **Source**, select **GitHub Actions**
+4. Push to `main` branch or run `npm run deploy`
+
+Your app will be live at: `https://[your-username].github.io/albanian-page-tool/`
+
+### Building for Production
 
 ```bash
 npm run build

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import {
-  BrowserRouter,
+  HashRouter,
   Routes,
   Route,
   useNavigate,
@@ -802,9 +802,9 @@ function AppContent() {
 
 function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <AppContent />
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
