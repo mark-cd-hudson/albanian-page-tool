@@ -27,9 +27,9 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     <div className="flex flex-col items-center justify-center h-full p-8">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-indigo-100 rounded-full mb-4">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-[#E8D5C4] rounded-full mb-4">
             <svg
-              className="w-10 h-10 text-indigo-600"
+              className="w-10 h-10 text-[#9C7556] dark:text-[#8B6F47]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -62,7 +62,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={isProcessing}
-          className="w-full py-4 px-6 bg-indigo-600 text-white rounded-xl font-medium text-lg hover:bg-indigo-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+          className="w-full py-4 px-6 bg-[#9C7556] dark:bg-[#3E2E22] text-white rounded-xl font-medium text-lg hover:bg-[#7A5639] dark:hover:bg-[#2C1F16] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
           {isProcessing ? (
             <span className="flex items-center justify-center">

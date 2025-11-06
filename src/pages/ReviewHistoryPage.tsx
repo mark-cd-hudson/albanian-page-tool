@@ -15,10 +15,10 @@ const getRatingLabel = (rating: number): string => {
 const getRatingColor = (rating: number): string => {
   const colors = [
     "",
-    "text-red-600 bg-red-50",
-    "text-orange-600 bg-orange-50",
-    "text-green-600 bg-green-50",
-    "text-blue-600 bg-blue-50",
+    "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30",
+    "text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30",
+    "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30",
+    "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30",
   ];
   return colors[rating] || "";
 };
@@ -41,41 +41,47 @@ export const ReviewHistoryPage: React.FC<ReviewHistoryPageProps> = ({
   };
 
   if (loading) {
-    return <div className="p-8 text-center">Loading...</div>;
+    return (
+      <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+        Loading...
+      </div>
+    );
   }
 
   return (
     <div className="p-4 lg:p-8 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Review History</h1>
+      <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
+        Review History
+      </h1>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="bg-white dark:bg-gray-950 rounded-lg shadow overflow-hidden">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead className="bg-gray-50 dark:bg-gray-900">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                 Date
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                 Word
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                 Language
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                 Rating
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white dark:bg-gray-950 divide-y divide-gray-200 dark:divide-gray-700">
             {reviews.map((review) => (
               <tr key={review.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                   {format(new Date(review.date), "MMM dd, yyyy HH:mm")}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                   {review.word}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                   {review.language}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -93,7 +99,7 @@ export const ReviewHistoryPage: React.FC<ReviewHistoryPageProps> = ({
         </table>
 
         {reviews.length === 0 && (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
             No review history yet. Start reviewing to see your progress!
           </div>
         )}

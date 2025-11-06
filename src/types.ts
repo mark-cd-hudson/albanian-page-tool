@@ -39,6 +39,7 @@ export interface AppSettings {
   nativeLanguage: string; // Target language for translations (default: English)
   recentLanguages: string[]; // Recently used source languages
   selectedLanguage: string; // Selected language for vocab/stats filtering (default: "all")
+  darkMode: boolean; // Dark mode preference (default: false)
 }
 
 // Vocabulary and Review System Types
@@ -74,6 +75,7 @@ export interface DailyStats {
   language: string;
   reviewCount: number;
   wordsAdded: number;
+  wordsMastered: number; // New field
 }
 
 export interface WordReview {

@@ -127,9 +127,9 @@ export const PageUploadForm: React.FC<PageUploadFormProps> = ({
     <div className="flex flex-col items-center justify-center h-full p-8 overflow-y-auto">
       <div className="max-w-2xl w-full">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-indigo-100 rounded-full mb-4">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-[#E8D5C4] rounded-full mb-4">
             <svg
-              className="w-10 h-10 text-indigo-600"
+              className="w-10 h-10 text-[#9C7556] dark:text-[#8B6F47]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -192,7 +192,7 @@ export const PageUploadForm: React.FC<PageUploadFormProps> = ({
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#9C7556] dark:focus:ring-[#8B6F47] focus:border-[#9C7556] dark:focus:border-[#8B6F47] outline-none"
                 >
                   <option value="">Select a language...</option>
                   {allLanguages.map((lang) => (
@@ -214,7 +214,7 @@ export const PageUploadForm: React.FC<PageUploadFormProps> = ({
                     value={customLanguage}
                     onChange={(e) => setCustomLanguage(e.target.value)}
                     placeholder="e.g., Swahili"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#9C7556] dark:focus:ring-[#8B6F47] focus:border-[#9C7556] dark:focus:border-[#8B6F47] outline-none"
                   />
                 </div>
               )}
@@ -231,7 +231,7 @@ export const PageUploadForm: React.FC<PageUploadFormProps> = ({
                       setBookId(e.target.value);
                       setShowNewBookForm(e.target.value === "new");
                     }}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#9C7556] dark:focus:ring-[#8B6F47] focus:border-[#9C7556] dark:focus:border-[#8B6F47] outline-none"
                   >
                     <option value="">No book selected</option>
                     {books
@@ -252,7 +252,7 @@ export const PageUploadForm: React.FC<PageUploadFormProps> = ({
                 <div>
                   <button
                     onClick={() => setShowNewBookForm(!showNewBookForm)}
-                    className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
+                    className="text-[#9C7556] dark:text-[#D4A574] hover:text-[#7A5639] dark:hover:text-[#C9A671] text-sm font-medium"
                   >
                     {showNewBookForm ? "- Cancel" : "+ Add Book (Optional)"}
                   </button>
@@ -271,7 +271,7 @@ export const PageUploadForm: React.FC<PageUploadFormProps> = ({
                       value={newBookTitle}
                       onChange={(e) => setNewBookTitle(e.target.value)}
                       placeholder="Enter book title"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#9C7556] dark:focus:ring-[#8B6F47] focus:border-[#9C7556] dark:focus:border-[#8B6F47] outline-none"
                     />
                   </div>
                   <div>
@@ -283,7 +283,7 @@ export const PageUploadForm: React.FC<PageUploadFormProps> = ({
                       value={newBookAuthor}
                       onChange={(e) => setNewBookAuthor(e.target.value)}
                       placeholder="Enter author name"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#9C7556] dark:focus:ring-[#8B6F47] focus:border-[#9C7556] dark:focus:border-[#8B6F47] outline-none"
                     />
                   </div>
                   <div>
@@ -326,7 +326,7 @@ export const PageUploadForm: React.FC<PageUploadFormProps> = ({
                   onChange={(e) => setPageNumber(e.target.value)}
                   placeholder="e.g., 42"
                   min="1"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#9C7556] dark:focus:ring-[#8B6F47] focus:border-[#9C7556] dark:focus:border-[#8B6F47] outline-none"
                 />
               </div>
 
@@ -338,7 +338,7 @@ export const PageUploadForm: React.FC<PageUploadFormProps> = ({
                   !language ||
                   (language === "custom" && !customLanguage)
                 }
-                className="w-full py-4 px-6 bg-indigo-600 text-white rounded-xl font-medium text-lg hover:bg-indigo-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="w-full py-4 px-6 bg-[#9C7556] dark:bg-[#3E2E22] text-white rounded-xl font-medium text-lg hover:bg-[#7A5639] dark:hover:bg-[#2C1F16] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
                 Process Page
               </button>

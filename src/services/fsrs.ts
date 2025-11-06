@@ -92,9 +92,23 @@ class FSRSService {
     const diffYears = Math.floor(diffDays / 365);
     return `${diffYears}y`;
   }
+
+  // Check if a card is mastered
+  isMastered(card: Card): boolean {
+    if (!card) return false;
+    
+    // Card must be in Review state (2) and have an interval of at least 21 days
+    // scheduled_days represents the interval until next review
+    return card.state === 2 && (card.scheduled_days >= 21);
+  }
 }
 
 export const fsrsService = new FSRSService();
 export { Rating } from 'ts-fsrs';
 export type { Card } from 'ts-fsrs';
+
+// Export helper function for use elsewhere
+export const isMasteredWord = (fsrsCard: any): boolean => {
+  return fsrsService.isMastered(fsrsCard);
+};
 

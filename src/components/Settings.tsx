@@ -107,9 +107,9 @@ export const Settings: React.FC<SettingsProps> = ({
 
       {/* Modal */}
       <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+        <div className="bg-white dark:bg-gray-950 rounded-2xl shadow-2xl max-w-md w-full p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Settings</h2>
             <button
               onClick={onClose}
               className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
@@ -138,7 +138,7 @@ export const Settings: React.FC<SettingsProps> = ({
               <select
                 value={nativeLanguage}
                 onChange={(e) => setNativeLanguage(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#9C7556] dark:focus:ring-[#8B6F47] focus:border-[#9C7556] dark:focus:border-[#8B6F47] outline-none"
               >
                 <option value="English">English</option>
                 {COMMON_LANGUAGES.map((lang) => (
@@ -147,7 +147,7 @@ export const Settings: React.FC<SettingsProps> = ({
                   </option>
                 ))}
               </select>
-              <p className="mt-2 text-sm text-gray-500">
+              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
                 Pages will be translated into this language.
               </p>
             </div>
@@ -161,9 +161,9 @@ export const Settings: React.FC<SettingsProps> = ({
                 value={newApiKey}
                 onChange={(e) => setNewApiKey(e.target.value)}
                 placeholder="sk-ant-..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#9C7556] dark:focus:ring-[#8B6F47] focus:border-[#9C7556] dark:focus:border-[#8B6F47] outline-none"
               />
-              <p className="mt-2 text-sm text-gray-500">
+              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
                 Your API key is stored locally in your browser and never sent
                 anywhere except to Anthropic.
               </p>
@@ -202,7 +202,7 @@ export const Settings: React.FC<SettingsProps> = ({
           </div>
 
           {/* Data Management Section */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
+          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Data Management
             </h3>
@@ -302,7 +302,7 @@ export const Settings: React.FC<SettingsProps> = ({
               )}
             </div>
 
-            <p className="mt-3 text-xs text-gray-500">
+            <p className="mt-3 text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
               Export your data to back it up or transfer to another device.
               Import will replace all existing data.
             </p>
@@ -317,7 +317,7 @@ export const Settings: React.FC<SettingsProps> = ({
             </button>
             <button
               onClick={handleSave}
-              className="flex-1 py-2 px-4 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+              className="flex-1 py-2 px-4 bg-[#9C7556] dark:bg-[#3E2E22] text-white rounded-lg font-medium hover:bg-[#7A5639] transition-colors"
             >
               Save
             </button>

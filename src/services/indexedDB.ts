@@ -1,5 +1,6 @@
 import { PageData, AppSettings, Book, VocabWord, VocabContext, ReviewSession, DailyStats, WordReview } from '../types';
 import { applyMigrations, CURRENT_DB_VERSION } from './migrations';
+import { isMasteredWord } from './fsrs';
 
 const DB_NAME = 'LanguagePageTool';
 const DB_VERSION = CURRENT_DB_VERSION;
@@ -297,6 +298,7 @@ class IndexedDBService {
     return new Promise((resolve, reject) => {
       const transaction = db.transaction([VOCAB_STORE, DAILY_STATS_STORE], 'readwrite');
       const vocabStore = transaction.objectStore(VOCAB_STORE);
+      const dailyStatsStore = transaction.objectStore(DAILY_STATS_STORE);
       const getRequest = vocabStore.get(key);
 
       getRequest.onsuccess = () => {
@@ -332,12 +334,37 @@ class IndexedDBService {
 
         const putRequest = vocabStore.put(vocabWord);
         
-        putRequest.onsuccess = async () => {
-          // Update daily stats if this is a new word
+        putRequest.onsuccess = () => {
+          // Update daily stats if this is a new word - within the same transaction
           if (isNew) {
-            await this.updateDailyStats(language, 'wordsAdded', 1);
+            const date = new Date().toISOString().split('T')[0];
+            const statsKey = `${date}_${language}`;
+            const statsGetRequest = dailyStatsStore.get(statsKey);
+            
+            statsGetRequest.onsuccess = () => {
+              let stats = statsGetRequest.result;
+              
+              if (!stats) {
+                stats = {
+                  date,
+                  language,
+                  reviewCount: 0,
+                  wordsAdded: 0,
+                  date_language: statsKey,
+                };
+              }
+              
+              stats.wordsAdded += 1;
+              
+              const statsPutRequest = dailyStatsStore.put(stats);
+              statsPutRequest.onsuccess = () => resolve();
+              statsPutRequest.onerror = () => reject(statsPutRequest.error);
+            };
+            
+            statsGetRequest.onerror = () => reject(statsGetRequest.error);
+          } else {
+            resolve();
           }
-          resolve();
         };
         putRequest.onerror = () => reject(putRequest.error);
       };
@@ -383,12 +410,17 @@ class IndexedDBService {
       const store = transaction.objectStore(VOCAB_STORE);
       const getRequest = store.get(key);
 
-      getRequest.onsuccess = () => {
+      getRequest.onsuccess = async () => {
         const existing = getRequest.result;
         if (existing) {
+          const oldCard = existing.fsrsCard;
           existing.fsrsCard = fsrsCard;
           const putRequest = store.put(existing);
-          putRequest.onsuccess = () => resolve();
+          putRequest.onsuccess = async () => {
+            // Check if card became mastered
+            await this.checkAndUpdateMasteredStatus(word, language, oldCard, fsrsCard);
+            resolve();
+          };
           putRequest.onerror = () => reject(putRequest.error);
         } else {
           reject(new Error('Vocab word not found'));
@@ -397,6 +429,53 @@ class IndexedDBService {
 
       getRequest.onerror = () => reject(getRequest.error);
     });
+  }
+
+  private async checkAndUpdateMasteredStatus(
+    _word: string,
+    language: string,
+    oldCard: any,
+    newCard: any
+  ): Promise<void> {
+    // Check if card just became mastered
+    const wasMastered = oldCard && isMasteredWord(oldCard);
+    const isMastered = isMasteredWord(newCard);
+    
+    // If newly mastered, increment today's mastered count
+    if (!wasMastered && isMastered) {
+      const date = new Date().toISOString().split('T')[0];
+      const statsKey = `${date}_${language}`;
+      const db = await this.ensureDB();
+      
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction([DAILY_STATS_STORE], 'readwrite');
+        const store = transaction.objectStore(DAILY_STATS_STORE);
+        const getRequest = store.get(statsKey);
+        
+        getRequest.onsuccess = () => {
+          let stats = getRequest.result;
+          
+          if (!stats) {
+            stats = {
+              date,
+              language,
+              reviewCount: 0,
+              wordsAdded: 0,
+              wordsMastered: 1,
+              date_language: statsKey,
+            };
+          } else {
+            stats.wordsMastered = (stats.wordsMastered || 0) + 1;
+          }
+          
+          const putRequest = store.put(stats);
+          putRequest.onsuccess = () => resolve();
+          putRequest.onerror = () => reject(putRequest.error);
+        };
+        
+        getRequest.onerror = () => reject(getRequest.error);
+      });
+    }
   }
 
   async toggleIgnoreWord(word: string, language: string): Promise<void> {
@@ -549,13 +628,37 @@ class IndexedDBService {
     const db = await this.ensureDB();
     return new Promise((resolve, reject) => {
       const transaction = db.transaction([WORD_REVIEWS_STORE, DAILY_STATS_STORE], 'readwrite');
-      const store = transaction.objectStore(WORD_REVIEWS_STORE);
-      const request = store.add(review);
+      const reviewsStore = transaction.objectStore(WORD_REVIEWS_STORE);
+      const dailyStatsStore = transaction.objectStore(DAILY_STATS_STORE);
+      const request = reviewsStore.add(review);
       
-      request.onsuccess = async () => {
-        // Update daily stats
-        await this.updateDailyStats(review.language, 'reviewCount', 1);
-        resolve();
+      request.onsuccess = () => {
+        // Update daily stats - within the same transaction
+        const date = new Date().toISOString().split('T')[0];
+        const statsKey = `${date}_${review.language}`;
+        const statsGetRequest = dailyStatsStore.get(statsKey);
+        
+        statsGetRequest.onsuccess = () => {
+          let stats = statsGetRequest.result;
+          
+          if (!stats) {
+            stats = {
+              date,
+              language: review.language,
+              reviewCount: 0,
+              wordsAdded: 0,
+              date_language: statsKey,
+            };
+          }
+          
+          stats.reviewCount += 1;
+          
+          const statsPutRequest = dailyStatsStore.put(stats);
+          statsPutRequest.onsuccess = () => resolve();
+          statsPutRequest.onerror = () => reject(statsPutRequest.error);
+        };
+        
+        statsGetRequest.onerror = () => reject(statsGetRequest.error);
       };
       request.onerror = () => reject(request.error);
     });

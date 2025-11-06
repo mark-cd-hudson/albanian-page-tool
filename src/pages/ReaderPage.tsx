@@ -57,7 +57,7 @@ export const ReaderPage: React.FC<ReaderPageProps> = ({
           </p>
           <Link
             to="/"
-            className="text-indigo-600 hover:text-indigo-700 font-medium"
+            className="text-[#9C7556] dark:text-[#D4A574] hover:text-[#7A5639] dark:hover:text-[#C9A671] font-medium"
           >
             ← Go back
           </Link>
@@ -102,7 +102,7 @@ export const ReaderPage: React.FC<ReaderPageProps> = ({
           </p>
           <Link
             to="/create-page"
-            className="inline-block px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium"
+            className="inline-block px-4 py-2 bg-[#9C7556] dark:bg-[#3E2E22] text-white rounded-lg hover:bg-[#7A5639] font-medium"
           >
             Add Page
           </Link>

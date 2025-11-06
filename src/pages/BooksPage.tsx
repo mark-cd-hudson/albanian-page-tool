@@ -44,12 +44,16 @@ export const BooksPage: React.FC<BooksPageProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Books</h1>
-            <p className="text-gray-600 mt-1">Manage your book collection</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              Books
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              Manage your book collection
+            </p>
           </div>
           <button
             onClick={() => setShowCreateForm(true)}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+            className="px-4 py-2 bg-[#9C7556] dark:bg-[#3E2E22] text-white rounded-lg hover:bg-[#7A5639] dark:hover:bg-[#2C1F16] transition-colors font-medium"
           >
             + Add Book
           </button>
@@ -58,7 +62,7 @@ export const BooksPage: React.FC<BooksPageProps> = ({
         {/* Books Grid */}
         {books.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
+            <div className="text-gray-400 dark:text-gray-500 mb-4">
               <svg
                 className="w-16 h-16 mx-auto"
                 fill="none"
@@ -73,10 +77,10 @@ export const BooksPage: React.FC<BooksPageProps> = ({
                 />
               </svg>
             </div>
-            <p className="text-gray-600">No books yet</p>
+            <p className="text-gray-600 dark:text-gray-400">No books yet</p>
             <button
               onClick={() => setShowCreateForm(true)}
-              className="mt-4 text-indigo-600 hover:text-indigo-700 font-medium"
+              className="mt-4 text-[#9C7556] dark:text-[#D4A574] hover:text-[#7A5639] dark:hover:text-[#C9A671] font-medium"
             >
               Create your first book
             </button>
@@ -88,7 +92,7 @@ export const BooksPage: React.FC<BooksPageProps> = ({
               return (
                 <div
                   key={book.id}
-                  className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                  className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow"
                 >
                   <Link to={`/books/${book.id}`} className="block">
                     <div className="flex gap-4 mb-3">
@@ -99,9 +103,9 @@ export const BooksPage: React.FC<BooksPageProps> = ({
                           className="w-16 h-20 object-cover rounded shadow-sm"
                         />
                       ) : (
-                        <div className="w-16 h-20 bg-gray-100 rounded flex items-center justify-center">
+                        <div className="w-16 h-20 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center">
                           <svg
-                            className="w-8 h-8 text-gray-400"
+                            className="w-8 h-8 text-gray-400 dark:text-gray-500"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -116,27 +120,27 @@ export const BooksPage: React.FC<BooksPageProps> = ({
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-gray-900 truncate">
+                        <h3 className="font-semibold text-gray-900 dark:text-white truncate">
                           {book.title}
                         </h3>
                         {book.author && (
-                          <p className="text-sm text-gray-600 truncate">
+                          <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
                             by {book.author}
                           </p>
                         )}
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                           {book.language}
                         </p>
                       </div>
                     </div>
                   </Link>
-                  <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                    <span className="text-sm text-gray-600">
+                  <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
                       {pageCount} {pageCount === 1 ? "page" : "pages"}
                     </span>
                     <button
                       onClick={() => setDeleteBookId(book.id)}
-                      className="text-red-600 hover:text-red-700 text-sm font-medium"
+                      className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm font-medium"
                     >
                       Delete
                     </button>
@@ -161,13 +165,13 @@ export const BooksPage: React.FC<BooksPageProps> = ({
         {/* Delete Book Modal */}
         {deleteBookId && bookToDelete && (
           <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
+            <div className="bg-white dark:bg-gray-950 rounded-lg shadow-xl max-w-md w-full p-6">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
                 Delete "{bookToDelete.title}"?
               </h2>
               {pagesCount > 0 && (
                 <div className="mb-4">
-                  <p className="text-gray-700 mb-3">
+                  <p className="text-gray-700 dark:text-gray-300 mb-3">
                     This book has {pagesCount}{" "}
                     {pagesCount === 1 ? "page" : "pages"}. What would you like
                     to do with {pagesCount === 1 ? "it" : "them"}?
@@ -185,10 +189,10 @@ export const BooksPage: React.FC<BooksPageProps> = ({
                         className="mt-1"
                       />
                       <div>
-                        <div className="font-medium text-gray-900">
+                        <div className="font-medium text-gray-900 dark:text-white">
                           Keep pages without book
                         </div>
-                        <div className="text-sm text-gray-600">
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
                           Pages will remain but won't be linked to any book
                         </div>
                       </div>
@@ -205,10 +209,10 @@ export const BooksPage: React.FC<BooksPageProps> = ({
                         className="mt-1"
                       />
                       <div>
-                        <div className="font-medium text-gray-900">
+                        <div className="font-medium text-gray-900 dark:text-white">
                           Delete all pages
                         </div>
-                        <div className="text-sm text-gray-600">
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
                           Permanently delete all pages in this book
                         </div>
                       </div>
@@ -226,7 +230,7 @@ export const BooksPage: React.FC<BooksPageProps> = ({
                           className="mt-1"
                         />
                         <div className="flex-1">
-                          <div className="font-medium text-gray-900">
+                          <div className="font-medium text-gray-900 dark:text-white">
                             Move to another book
                           </div>
                           {deleteAction === "reassign" && (
@@ -235,7 +239,7 @@ export const BooksPage: React.FC<BooksPageProps> = ({
                               onChange={(e) =>
                                 setReassignBookId(e.target.value)
                               }
-                              className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                              className="mt-2 w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-lg text-sm"
                             >
                               <option value="">Select a book...</option>
                               {books
@@ -260,14 +264,14 @@ export const BooksPage: React.FC<BooksPageProps> = ({
                     setDeleteAction("orphan");
                     setReassignBookId("");
                   }}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors font-medium"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDeleteConfirm}
                   disabled={deleteAction === "reassign" && !reassignBookId}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2 bg-red-600 dark:bg-red-700 text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-800 transition-colors font-medium disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
                   Delete Book
                 </button>
@@ -330,13 +334,13 @@ const CreateBookModal: React.FC<CreateBookModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">
+      <div className="bg-white dark:bg-gray-950 rounded-lg shadow-xl max-w-md w-full p-6">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
           Create New Book
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Title *
             </label>
             <input
@@ -345,11 +349,11 @@ const CreateBookModal: React.FC<CreateBookModalProps> = ({
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Enter book title"
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#9C7556] dark:focus:ring-[#8B6F47] focus:border-[#9C7556] dark:focus:border-[#8B6F47] outline-none"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Author
             </label>
             <input
@@ -357,11 +361,11 @@ const CreateBookModal: React.FC<CreateBookModalProps> = ({
               value={author}
               onChange={(e) => setAuthor(e.target.value)}
               placeholder="Enter author name"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#9C7556] dark:focus:ring-[#8B6F47] focus:border-[#9C7556] dark:focus:border-[#8B6F47] outline-none"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Language *
             </label>
             <input
@@ -370,24 +374,24 @@ const CreateBookModal: React.FC<CreateBookModalProps> = ({
               onChange={(e) => setLanguage(e.target.value)}
               placeholder="e.g., Albanian, Spanish, French"
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#9C7556] dark:focus:ring-[#8B6F47] focus:border-[#9C7556] dark:focus:border-[#8B6F47] outline-none"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Cover Image
             </label>
             <input
               type="file"
               accept="image/*"
               onChange={handleCoverImageChange}
-              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+              className="w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#E8D5C4] dark:file:bg-[#3E2E22] file:text-[#7A5639] dark:file:text-[#D4A574] hover:file:bg-[#D4B89C] dark:hover:file:bg-[#4A3729]"
             />
             {coverImageUrl && (
               <img
                 src={coverImageUrl}
                 alt="Cover preview"
-                className="mt-2 max-w-[120px] h-auto rounded border border-gray-200"
+                className="mt-2 max-w-[120px] h-auto rounded border border-gray-200 dark:border-gray-700"
               />
             )}
           </div>
@@ -395,14 +399,14 @@ const CreateBookModal: React.FC<CreateBookModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors font-medium"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting || !title || !language}
-              className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium disabled:bg-gray-300 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2 bg-[#9C7556] dark:bg-[#3E2E22] text-white rounded-lg hover:bg-[#7A5639] dark:hover:bg-[#2C1F16] transition-colors font-medium disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
               {isSubmitting ? "Creating..." : "Create Book"}
             </button>

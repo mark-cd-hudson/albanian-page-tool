@@ -29,7 +29,7 @@ export const TextDisplay: React.FC<TextDisplayProps> = ({
     <div className="h-full overflow-y-auto pb-64">
       {/* Text Content - Continuous */}
       <div className="max-w-4xl mx-auto p-8">
-        <div className="text-lg leading-relaxed text-gray-900 space-y-4">
+        <div className="text-lg leading-relaxed text-gray-900 dark:text-gray-100 space-y-4">
           {page.paragraphs.map((paragraph, paragraphIdx) => (
             <p key={paragraphIdx}>
               {paragraph.sentences.map((sentence, sentenceIdx) => (
@@ -52,8 +52,10 @@ export const TextDisplay: React.FC<TextDisplayProps> = ({
                           }
                           className={
                             hasInfo
-                              ? `text-indigo-600 cursor-pointer hover:bg-indigo-100 px-1 py-0.5 rounded transition-colors font-medium ${
-                                  isSelected ? "bg-indigo-100" : ""
+                              ? `cursor-pointer hover:bg-[#E8D5C4] dark:hover:bg-[#3E2E22] px-1 py-0.5 rounded transition-colors border-b border-dotted border-gray-400 dark:border-gray-600 ${
+                                  isSelected
+                                    ? "bg-[#E8D5C4] dark:bg-[#3E2E22]"
+                                    : ""
                                 }`
                               : ""
                           }
@@ -72,7 +74,7 @@ export const TextDisplay: React.FC<TextDisplayProps> = ({
 
         {/* Page Number */}
         {page.pageNumber && (
-          <div className="mt-8 text-center text-gray-500 text-sm">
+          <div className="mt-8 text-center text-gray-500 dark:text-gray-400 text-sm">
             Page {page.pageNumber}
           </div>
         )}

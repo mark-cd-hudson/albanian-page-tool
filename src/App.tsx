@@ -45,6 +45,7 @@ function AppContent() {
     nativeLanguage: DEFAULT_NATIVE_LANGUAGE,
     recentLanguages: [],
     selectedLanguage: "all",
+    darkMode: false,
   });
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState<boolean>(false);
@@ -96,6 +97,15 @@ function AppContent() {
     };
     loadDueCount();
   }, [settings.selectedLanguage]);
+
+  // Apply dark mode
+  useEffect(() => {
+    if (settings.darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [settings.darkMode]);
 
   const handleSaveSettings = async (newSettings: AppSettings) => {
     setSettings(newSettings);
@@ -398,11 +408,11 @@ function AppContent() {
               />
             )}
             <div className="min-w-0">
-              <h1 className="text-base md:text-lg font-bold text-gray-900 truncate">
+              <h1 className="text-base md:text-lg font-bold text-gray-900 dark:text-white truncate">
                 {book.title}
               </h1>
               {book.author && (
-                <p className="text-xs text-gray-600 truncate hidden sm:block">
+                <p className="text-xs text-gray-600 dark:text-gray-400 truncate hidden sm:block">
                   by {book.author}
                 </p>
               )}
@@ -416,8 +426,10 @@ function AppContent() {
     if (location.pathname === "/books") {
       return (
         <div className="min-w-0">
-          <h1 className="text-lg md:text-xl font-bold text-gray-900">Books</h1>
-          <p className="text-xs text-gray-600">
+          <h1 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">
+            Books
+          </h1>
+          <p className="text-xs text-gray-600 dark:text-gray-400">
             {books.length} {books.length === 1 ? "book" : "books"}
           </p>
         </div>
@@ -428,10 +440,10 @@ function AppContent() {
     if (location.pathname === "/create-page") {
       return (
         <div className="min-w-0">
-          <h1 className="text-lg md:text-xl font-bold text-gray-900">
+          <h1 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">
             Add New Page
           </h1>
-          <p className="text-xs text-gray-600 hidden sm:block">
+          <p className="text-xs text-gray-600 dark:text-gray-400 hidden sm:block">
             Upload and process a book page
           </p>
         </div>
@@ -442,10 +454,10 @@ function AppContent() {
     if (location.pathname === "/vocab") {
       return (
         <div className="min-w-0">
-          <h1 className="text-lg md:text-xl font-bold text-gray-900">
+          <h1 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">
             Vocabulary
           </h1>
-          <p className="text-xs text-gray-600 hidden sm:block">
+          <p className="text-xs text-gray-600 dark:text-gray-400 hidden sm:block">
             {settings.selectedLanguage === "all"
               ? "All Languages"
               : settings.selectedLanguage}
@@ -458,8 +470,10 @@ function AppContent() {
     if (location.pathname === "/review") {
       return (
         <div className="min-w-0">
-          <h1 className="text-lg md:text-xl font-bold text-gray-900">Review</h1>
-          <p className="text-xs text-gray-600 hidden sm:block">
+          <h1 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">
+            Review
+          </h1>
+          <p className="text-xs text-gray-600 dark:text-gray-400 hidden sm:block">
             {dueCount} word{dueCount !== 1 ? "s" : ""} due
           </p>
         </div>
@@ -470,10 +484,10 @@ function AppContent() {
     if (location.pathname === "/review-history") {
       return (
         <div className="min-w-0">
-          <h1 className="text-lg md:text-xl font-bold text-gray-900">
+          <h1 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">
             Review History
           </h1>
-          <p className="text-xs text-gray-600 hidden sm:block">
+          <p className="text-xs text-gray-600 dark:text-gray-400 hidden sm:block">
             {settings.selectedLanguage === "all"
               ? "All Languages"
               : settings.selectedLanguage}
@@ -486,10 +500,10 @@ function AppContent() {
     if (location.pathname === "/stats") {
       return (
         <div className="min-w-0">
-          <h1 className="text-lg md:text-xl font-bold text-gray-900">
+          <h1 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">
             Statistics
           </h1>
-          <p className="text-xs text-gray-600 hidden sm:block">
+          <p className="text-xs text-gray-600 dark:text-gray-400 hidden sm:block">
             {settings.selectedLanguage === "all"
               ? "All Languages"
               : settings.selectedLanguage}
@@ -501,10 +515,10 @@ function AppContent() {
     // Default fallback (home page with no specific route)
     return (
       <div className="min-w-0">
-        <h1 className="text-lg md:text-xl font-bold text-gray-900 truncate">
+        <h1 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white truncate">
           Language Learning Tool
         </h1>
-        <p className="text-xs text-gray-600 hidden sm:block">
+        <p className="text-xs text-gray-600 dark:text-gray-400 hidden sm:block">
           Learn languages by reading books
         </p>
       </div>
@@ -512,7 +526,7 @@ function AppContent() {
   };
 
   return (
-    <div className="flex h-screen bg-white overflow-hidden">
+    <div className="flex h-screen bg-white dark:bg-gray-950 overflow-hidden">
       {/* Sidebar Backdrop (Mobile) */}
       {sidebarOpen && (
         <div
@@ -524,6 +538,7 @@ function AppContent() {
       {/* Sidebar */}
       <Sidebar
         pages={pages}
+        books={books}
         currentPageId={currentPage?.id || null}
         onSelectPage={handleSelectPage}
         onDeletePage={handleDeletePage}
@@ -538,14 +553,14 @@ function AppContent() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-4 md:px-6 py-3">
+        <header className="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 px-4 md:px-6 py-3">
           <div className="flex items-center justify-between gap-2 md:gap-4">
             {/* Left: Hamburger + Book Details or Default Title */}
             <div className="flex items-center gap-3">
               {/* Hamburger Menu Button */}
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
+                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
                 title={sidebarOpen ? "Close sidebar" : "Open sidebar"}
               >
                 <svg
@@ -584,37 +599,83 @@ function AppContent() {
               </div>
             )}
 
-            {/* Right: Settings Button */}
-            <button
-              onClick={() => setShowSettings(true)}
-              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
-              title="Settings"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            {/* Right: Dark Mode Toggle and Settings */}
+            <div className="flex items-center gap-2">
+              {/* Dark Mode Toggle */}
+              <button
+                onClick={() => {
+                  const newSettings = {
+                    ...settings,
+                    darkMode: !settings.darkMode,
+                  };
+                  handleSaveSettings(newSettings);
+                }}
+                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
+                title={settings.darkMode ? "Light mode" : "Dark mode"}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-            </button>
+                {settings.darkMode ? (
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                    />
+                  </svg>
+                )}
+              </button>
+
+              {/* Settings Button */}
+              <button
+                onClick={() => setShowSettings(true)}
+                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
+                title="Settings"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
         </header>
 
         {/* Content Area - Routes */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto bg-white dark:bg-gray-950">
           {processingStep ? (
             <ProcessingScreen step={processingStep} />
           ) : (

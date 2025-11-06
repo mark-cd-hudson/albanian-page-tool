@@ -185,7 +185,10 @@ export const ReviewPage: React.FC<ReviewPageProps> = ({ selectedLanguage }) => {
 
       if (cleanPart === cleanWord) {
         return (
-          <span key={i} className="bg-yellow-200 font-semibold px-1 rounded">
+          <span
+            key={i}
+            className="bg-yellow-200 dark:bg-yellow-900/50 font-semibold px-1 rounded"
+          >
             {part}
           </span>
         );
@@ -248,15 +251,15 @@ export const ReviewPage: React.FC<ReviewPageProps> = ({ selectedLanguage }) => {
     return (
       <div className="flex flex-col items-center justify-center h-full p-8 text-center">
         <div className="text-6xl mb-4">🎉</div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
           All Caught Up!
         </h1>
-        <p className="text-gray-600 mb-6">
+        <p className="text-gray-600 dark:text-gray-400 mb-6">
           No words due for review right now. Great job!
         </p>
         <button
           onClick={loadWordsToReview}
-          className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+          className="px-6 py-2 bg-[#9C7556] dark:bg-[#3E2E22] text-white rounded-lg hover:bg-[#7A5639] dark:hover:bg-[#2C1F16]"
         >
           Check Again
         </button>
@@ -268,19 +271,19 @@ export const ReviewPage: React.FC<ReviewPageProps> = ({ selectedLanguage }) => {
     return (
       <div className="flex flex-col items-center justify-center h-full p-8 text-center">
         <div className="text-6xl mb-4">📚</div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
           Ready to Review?
         </h1>
-        <p className="text-gray-600 mb-6">
+        <p className="text-gray-600 dark:text-gray-400 mb-6">
           You have{" "}
-          <span className="font-bold text-indigo-600">
+          <span className="font-bold text-[#9C7556] dark:text-[#D4A574]">
             {reviewQueue.length}
           </span>{" "}
           word{reviewQueue.length !== 1 ? "s" : ""} due for review.
         </p>
         <button
           onClick={startSession}
-          className="px-8 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-lg font-medium"
+          className="px-8 py-3 bg-[#9C7556] dark:bg-[#3E2E22] text-white rounded-lg hover:bg-[#7A5639] text-lg font-medium"
         >
           Start Review
         </button>
@@ -292,17 +295,20 @@ export const ReviewPage: React.FC<ReviewPageProps> = ({ selectedLanguage }) => {
     return (
       <div className="flex flex-col items-center justify-center h-full p-8 text-center">
         <div className="text-6xl mb-4">✨</div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
           Session Complete!
         </h1>
-        <p className="text-gray-600 mb-6">
+        <p className="text-gray-600 dark:text-gray-400 mb-6">
           You reviewed{" "}
-          <span className="font-bold text-indigo-600">{reviewedCount}</span>{" "}
-          word{reviewedCount !== 1 ? "s" : ""}.
+          <span className="font-bold text-[#9C7556] dark:text-[#D4A574]">
+            {reviewedCount}
+          </span>{" "}
+          word
+          {reviewedCount !== 1 ? "s" : ""}.
         </p>
         <button
           onClick={loadWordsToReview}
-          className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+          className="px-6 py-2 bg-[#9C7556] dark:bg-[#3E2E22] text-white rounded-lg hover:bg-[#7A5639] dark:hover:bg-[#2C1F16]"
         >
           Review Again
         </button>
@@ -311,23 +317,27 @@ export const ReviewPage: React.FC<ReviewPageProps> = ({ selectedLanguage }) => {
   }
 
   if (!currentCard || !currentContext) {
-    return <div className="p-8 text-center text-gray-500">Loading...</div>;
+    return (
+      <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+        Loading...
+      </div>
+    );
   }
 
   return (
     <div className="flex flex-col h-full">
       {/* Progress Bar */}
-      <div className="bg-gray-100 p-4 border-b">
+      <div className="bg-gray-100 dark:bg-gray-900 p-4 border-b border-gray-200 dark:border-gray-800">
         <div className="max-w-3xl mx-auto">
-          <div className="flex justify-between text-sm text-gray-600 mb-2">
+          <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
             <span>Progress</span>
             <span>
               {currentIndex + 1} / {reviewQueue.length}
             </span>
           </div>
-          <div className="w-full bg-gray-300 rounded-full h-2">
+          <div className="w-full bg-gray-300 dark:bg-gray-700 rounded-full h-2">
             <div
-              className="bg-indigo-600 h-2 rounded-full transition-all"
+              className="bg-[#9C7556] dark:bg-[#8B6F47] h-2 rounded-full transition-all"
               style={{
                 width: `${((currentIndex + 1) / reviewQueue.length) * 100}%`,
               }}
@@ -339,7 +349,7 @@ export const ReviewPage: React.FC<ReviewPageProps> = ({ selectedLanguage }) => {
       {/* Review Card */}
       <div className="flex-1 flex items-center justify-center p-4 lg:p-8">
         <div className="max-w-2xl w-full">
-          <div className="bg-white rounded-lg shadow-lg p-6 lg:p-8 relative">
+          <div className="bg-white dark:bg-gray-950 rounded-lg shadow-lg p-6 lg:p-8 relative border border-transparent dark:border-gray-800">
             {/* Three-dot menu */}
             <div className="absolute top-4 right-4">
               <button
@@ -347,7 +357,7 @@ export const ReviewPage: React.FC<ReviewPageProps> = ({ selectedLanguage }) => {
                   e.stopPropagation();
                   setShowMenu(!showMenu);
                 }}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                 aria-label="Options"
               >
                 <svg
@@ -363,14 +373,14 @@ export const ReviewPage: React.FC<ReviewPageProps> = ({ selectedLanguage }) => {
               {showMenu && (
                 <div
                   onClick={(e) => e.stopPropagation()}
-                  className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10"
+                  className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-10"
                 >
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleIgnoreWord();
                     }}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
                   >
                     <svg
                       className="w-4 h-4"
@@ -393,11 +403,11 @@ export const ReviewPage: React.FC<ReviewPageProps> = ({ selectedLanguage }) => {
 
             {/* Context Navigation */}
             {currentCard.contexts.length > 1 && (
-              <div className="flex justify-between items-center mb-4 text-sm text-gray-500">
+              <div className="flex justify-between items-center mb-4 text-sm text-gray-500 dark:text-gray-400">
                 <button
                   onClick={handlePrevContext}
                   disabled={contextIndex === 0}
-                  className="px-3 py-1 border rounded disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50"
+                  className="px-3 py-1 border border-gray-300 dark:border-gray-700 rounded disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
                 >
                   ← Prev
                 </button>
@@ -407,7 +417,7 @@ export const ReviewPage: React.FC<ReviewPageProps> = ({ selectedLanguage }) => {
                 <button
                   onClick={handleNextContext}
                   disabled={contextIndex === currentCard.contexts.length - 1}
-                  className="px-3 py-1 border rounded disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50"
+                  className="px-3 py-1 border border-gray-300 dark:border-gray-700 rounded disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
                 >
                   Next →
                 </button>
@@ -429,17 +439,17 @@ export const ReviewPage: React.FC<ReviewPageProps> = ({ selectedLanguage }) => {
             >
               {/* Word being studied */}
               <div className="mb-6 text-center">
-                <div className="text-3xl lg:text-4xl font-bold text-indigo-600">
+                <div className="text-3xl lg:text-4xl font-bold text-[#9C7556] dark:text-[#D4A574] dark:text-[#D4A574]">
                   {currentCard.word}
                 </div>
               </div>
 
               {/* Sentence with highlighted word */}
               <div className="mb-6">
-                <div className="text-sm text-gray-500 uppercase mb-2">
+                <div className="text-sm text-gray-500 dark:text-gray-400 uppercase mb-2">
                   Example Sentence
                 </div>
-                <div className="text-xl lg:text-2xl text-gray-800 leading-relaxed">
+                <div className="text-xl lg:text-2xl text-gray-800 dark:text-gray-200 leading-relaxed">
                   {highlightWord(currentContext.sentenceText, currentCard.word)}
                 </div>
               </div>
@@ -447,20 +457,20 @@ export const ReviewPage: React.FC<ReviewPageProps> = ({ selectedLanguage }) => {
 
             {/* Answer */}
             {showAnswer && (
-              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+              <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-transparent dark:border-gray-800">
                 <div className="mb-3">
-                  <div className="text-sm font-semibold text-gray-500 uppercase mb-1">
+                  <div className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">
                     Word Meaning
                   </div>
-                  <div className="text-lg text-gray-900">
+                  <div className="text-lg text-gray-900 dark:text-white">
                     {currentContext.meaning}
                   </div>
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-gray-500 uppercase mb-1">
+                  <div className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">
                     Sentence Translation
                   </div>
-                  <div className="text-lg text-gray-900">
+                  <div className="text-lg text-gray-900 dark:text-white">
                     {currentContext.sentenceTranslation}
                   </div>
                 </div>
@@ -472,28 +482,34 @@ export const ReviewPage: React.FC<ReviewPageProps> = ({ selectedLanguage }) => {
 
       {/* Bottom Section - Conditional */}
       {sessionStartTime && (
-        <div className="border-t border-gray-200 bg-gray-50 p-4">
+        <div className="border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 p-4">
           <div className="max-w-3xl mx-auto">
             {!showAnswer ? (
               // Card Front: Show bucket counts
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
-                  <div className="text-3xl font-bold text-blue-600">
+                  <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
                     {newCount}
                   </div>
-                  <div className="text-xs text-gray-600 mt-1">New</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                    New
+                  </div>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold text-red-600">
+                  <div className="text-3xl font-bold text-red-600 dark:text-red-400">
                     {learningCount}
                   </div>
-                  <div className="text-xs text-gray-600 mt-1">Again</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                    Again
+                  </div>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold text-green-600">
+                  <div className="text-3xl font-bold text-green-600 dark:text-green-400">
                     {reviewCount}
                   </div>
-                  <div className="text-xs text-gray-600 mt-1">Review</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                    Review
+                  </div>
                 </div>
               </div>
             ) : (
@@ -502,12 +518,12 @@ export const ReviewPage: React.FC<ReviewPageProps> = ({ selectedLanguage }) => {
                 {schedulingInfo.map((info) => {
                   const buttonClass =
                     info.rating === Rating.Again
-                      ? "bg-red-100 text-red-700 hover:bg-red-200"
+                      ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/50"
                       : info.rating === Rating.Hard
-                      ? "bg-orange-100 text-orange-700 hover:bg-orange-200"
+                      ? "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 hover:bg-orange-200 dark:hover:bg-orange-900/50"
                       : info.rating === Rating.Good
-                      ? "bg-green-100 text-green-700 hover:bg-green-200"
-                      : "bg-blue-100 text-blue-700 hover:bg-blue-200";
+                      ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"
+                      : "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50";
 
                   const label =
                     info.rating === Rating.Again

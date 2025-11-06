@@ -49,7 +49,7 @@ export const DatabaseUpgradePrompt: React.FC<DatabaseUpgradePromptProps> = ({
 
           <button
             onClick={onReload}
-            className="w-full py-3 px-4 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors"
+            className="w-full py-3 px-4 bg-[#9C7556] dark:bg-[#3E2E22] text-white rounded-xl font-medium hover:bg-[#7A5639] dark:hover:bg-[#2C1F16] transition-colors"
           >
             Update Now
           </button>

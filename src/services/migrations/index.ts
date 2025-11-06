@@ -4,6 +4,7 @@ import { v2_add_languages_and_books } from './v2_add_languages_and_books';
 import { v3_recovery } from './v3_recovery';
 import { v4_vocab_system } from './v4_vocab_system';
 import { v5_word_reviews } from './v5_word_reviews';
+import { v6_add_mastered_stats } from './v6_add_mastered_stats';
 
 // All migrations in order
 export const migrations: Migration[] = [
@@ -12,6 +13,7 @@ export const migrations: Migration[] = [
   v3_recovery,
   v4_vocab_system,
   v5_word_reviews,
+  v6_add_mastered_stats,
 ];
 
 // Current database version (should match the last migration version)
