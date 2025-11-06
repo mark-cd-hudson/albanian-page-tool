@@ -2,12 +2,16 @@ import { Migration } from './types';
 import { v1_initial } from './v1_initial';
 import { v2_add_languages_and_books } from './v2_add_languages_and_books';
 import { v3_recovery } from './v3_recovery';
+import { v4_vocab_system } from './v4_vocab_system';
+import { v5_word_reviews } from './v5_word_reviews';
 
 // All migrations in order
 export const migrations: Migration[] = [
   v1_initial,
   v2_add_languages_and_books,
   v3_recovery,
+  v4_vocab_system,
+  v5_word_reviews,
 ];
 
 // Current database version (should match the last migration version)

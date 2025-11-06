@@ -1,17 +1,33 @@
-import React, { useState, useEffect } from "react";
-import { PageUploadForm } from "./components/PageUploadForm";
-import { ProcessingScreen } from "./components/ProcessingScreen";
-import { TextDisplay } from "./components/TextDisplay";
-import { BottomSheet } from "./components/BottomSheet";
+import { useState, useEffect } from "react";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  useNavigate,
+  useLocation,
+  Link,
+} from "react-router-dom";
 import { Sidebar } from "./components/Sidebar";
 import { Settings } from "./components/Settings";
 import { DatabaseUpgradePrompt } from "./components/DatabaseUpgradePrompt";
 import { FullscreenImageViewer } from "./components/FullscreenImageViewer";
+import { BottomSheet } from "./components/BottomSheet";
+import { ReaderPage } from "./pages/ReaderPage";
+import { BooksPage } from "./pages/BooksPage";
+import { BookDetailPage } from "./pages/BookDetailPage";
+import { CreatePagePage } from "./pages/CreatePagePage";
+import { VocabPage } from "./pages/VocabPage";
+import { ReviewPage } from "./pages/ReviewPage";
+import { ReviewHistoryPage } from "./pages/ReviewHistoryPage";
+import { StatsPage } from "./pages/StatsPage";
+import { ProcessingScreen } from "./components/ProcessingScreen";
 import { PageGallery } from "./components/PageGallery";
 import { ClaudeService } from "./services/claude";
 import { indexedDBService } from "./services/indexedDB";
-import { PageData, WordInfo, AppSettings, Book } from "./types";
+import { fsrsService } from "./services/fsrs";
+import { PageData, WordInfo, AppSettings, Book, VocabContext } from "./types";
 import { compressImage } from "./utils/imageCompression";
+import { hashString } from "./utils/hash";
 import { DEFAULT_NATIVE_LANGUAGE } from "./constants";
 
 type ProcessingStep =
@@ -21,11 +37,14 @@ type ProcessingStep =
   | "saving"
   | null;
 
-function App() {
+function AppContent() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [settings, setSettings] = useState<AppSettings>({
     apiKey: "",
     nativeLanguage: DEFAULT_NATIVE_LANGUAGE,
     recentLanguages: [],
+    selectedLanguage: "all",
   });
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState<boolean>(false);
@@ -35,6 +54,10 @@ function App() {
   const [selectedWord, setSelectedWord] = useState<WordInfo | null>(null);
   const [processingStep, setProcessingStep] = useState<ProcessingStep>(null);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(
+    typeof window !== "undefined" ? window.innerWidth >= 1024 : true
+  );
+  const [dueCount, setDueCount] = useState<number>(0);
 
   // Load initial data
   useEffect(() => {
@@ -63,10 +86,32 @@ function App() {
     loadData();
   }, []);
 
+  // Load due count when language changes
+  useEffect(() => {
+    const loadDueCount = async () => {
+      const dueWords = await indexedDBService.getWordsDueForReview(
+        settings.selectedLanguage
+      );
+      setDueCount(dueWords.length);
+    };
+    loadDueCount();
+  }, [settings.selectedLanguage]);
+
   const handleSaveSettings = async (newSettings: AppSettings) => {
     setSettings(newSettings);
     await indexedDBService.saveSettings(newSettings);
   };
+
+  const handleLanguageChange = async (language: string) => {
+    const newSettings = { ...settings, selectedLanguage: language };
+    setSettings(newSettings);
+    await indexedDBService.saveSettings(newSettings);
+  };
+
+  // Get available languages from pages and books
+  const availableLanguages = Array.from(
+    new Set([...pages.map((p) => p.language), ...books.map((b) => b.language)])
+  ).sort();
 
   const handleCreateBook = async (
     bookData: Omit<Book, "id" | "createdAt">
@@ -90,8 +135,53 @@ function App() {
     }
   };
 
+  const handleDeleteBook = async (
+    bookId: string,
+    action: "delete" | "orphan" | "reassign",
+    newBookId?: string
+  ) => {
+    // Get all pages for this book
+    const bookPages = pages.filter((p) => p.bookId === bookId);
+
+    if (action === "delete") {
+      // Delete all pages
+      for (const page of bookPages) {
+        await indexedDBService.deletePage(page.id);
+      }
+    } else if (action === "orphan") {
+      // Remove book association
+      for (const page of bookPages) {
+        const updatedPage = { ...page, bookId: undefined };
+        await indexedDBService.savePage(updatedPage);
+      }
+    } else if (action === "reassign" && newBookId) {
+      // Reassign to new book
+      for (const page of bookPages) {
+        const updatedPage = { ...page, bookId: newBookId };
+        await indexedDBService.savePage(updatedPage);
+      }
+    }
+
+    // Delete the book
+    await indexedDBService.deleteBook(bookId);
+
+    // Reload data
+    const updatedPages = await indexedDBService.getPages();
+    setPages(updatedPages);
+    const updatedBooks = await indexedDBService.getBooks();
+    setBooks(updatedBooks);
+
+    // Clear current page if it was deleted
+    if (
+      action === "delete" &&
+      currentPage &&
+      bookPages.some((p) => p.id === currentPage.id)
+    ) {
+      setCurrentPage(updatedPages[0] || null);
+    }
+  };
+
   const handleDatabaseUpgrade = () => {
-    // Close and reopen the database to trigger upgrade
     window.location.reload();
   };
 
@@ -166,6 +256,9 @@ function App() {
       setPages(updatedPages);
       setCurrentPage(updatedPages[0]);
       setProcessingStep(null);
+
+      // Navigate to the new page
+      navigate(`/pages/${newPage.id}`);
     } catch (error) {
       console.error("Error processing image:", error);
       alert(
@@ -179,7 +272,49 @@ function App() {
     setCurrentPage(page);
   };
 
+  const handleWordClick = async (
+    wordInfo: WordInfo,
+    pageId: string,
+    pageLanguage: string,
+    sentenceText: string,
+    sentenceWords: Map<string, WordInfo>
+  ) => {
+    // Set selected word for bottom sheet
+    setSelectedWord(wordInfo);
+
+    // Add ALL words from the sentence to vocabulary
+    // (clicking any word means you've read the entire sentence and encountered all words)
+    try {
+      const seenAt = Date.now();
+      const fsrsCard = fsrsService.createCard();
+      const sentenceId = hashString(sentenceText);
+
+      // Iterate through all words in the sentence
+      for (const [, info] of sentenceWords.entries()) {
+        const context: VocabContext = {
+          sentenceId,
+          sentenceText: sentenceText, // The original sentence text
+          sentenceTranslation: info.sentenceTranslation,
+          meaning: info.meaning,
+          pageId,
+          seenAt,
+        };
+
+        await indexedDBService.addVocabWord(
+          info.word,
+          pageLanguage,
+          context,
+          fsrsCard
+        );
+      }
+    } catch (error) {
+      console.error("Error adding words to vocabulary:", error);
+    }
+  };
+
   const handleDeletePage = async (id: string) => {
+    if (!window.confirm("Delete this page?")) return;
+
     await indexedDBService.deletePage(id);
     const updatedPages = await indexedDBService.getPages();
     setPages(updatedPages);
@@ -189,74 +324,261 @@ function App() {
     }
   };
 
-  const handleNewPage = () => {
-    setCurrentPage(null);
+  const getPageCountForBook = (bookId: string) => {
+    return pages.filter((p) => p.bookId === bookId).length;
   };
 
-  const currentBook = currentPage?.bookId
-    ? books.find((b) => b.id === currentPage.bookId) || null
+  // Get current page from URL if on reader route
+  const pageMatch = location.pathname.match(/^\/pages\/(.+)$/);
+  const currentPageFromRoute = pageMatch
+    ? pages.find((p) => p.id === pageMatch[1])
     : null;
+  const displayPage = currentPageFromRoute || currentPage;
+
+  // Render header content based on route
+  const renderHeaderContent = () => {
+    // Check if on page reader route
+    if (pageMatch && displayPage) {
+      const pageBook = displayPage.bookId
+        ? books.find((b) => b.id === displayPage.bookId)
+        : null;
+
+      if (pageBook) {
+        return (
+          <Link
+            to={`/books/${pageBook.id}`}
+            className="flex items-center gap-3 min-w-0 hover:opacity-75 transition-opacity"
+          >
+            {pageBook.coverImageUrl && (
+              <img
+                src={pageBook.coverImageUrl}
+                alt={pageBook.title}
+                className="h-10 md:h-12 w-auto object-contain rounded shadow-sm flex-shrink-0"
+              />
+            )}
+            <div className="min-w-0">
+              <h1 className="text-base md:text-lg font-bold text-gray-900 truncate">
+                {pageBook.title}
+              </h1>
+              {pageBook.author && (
+                <p className="text-xs text-gray-600 truncate hidden sm:block">
+                  by {pageBook.author}
+                </p>
+              )}
+            </div>
+          </Link>
+        );
+      }
+
+      return (
+        <div className="min-w-0">
+          <h1 className="text-lg md:text-xl font-bold text-gray-900 truncate">
+            Reading
+          </h1>
+          <p className="text-xs text-gray-600 hidden sm:block">
+            {displayPage.language}
+          </p>
+        </div>
+      );
+    }
+
+    // Check if on book detail page (don't make it a link since we're already on that page)
+    const bookDetailMatch = location.pathname.match(/^\/books\/(.+)$/);
+    if (bookDetailMatch) {
+      const bookId = bookDetailMatch[1];
+      const book = books.find((b) => b.id === bookId);
+      if (book) {
+        return (
+          <div className="flex items-center gap-3 min-w-0">
+            {book.coverImageUrl && (
+              <img
+                src={book.coverImageUrl}
+                alt={book.title}
+                className="h-10 md:h-12 w-auto object-contain rounded shadow-sm flex-shrink-0"
+              />
+            )}
+            <div className="min-w-0">
+              <h1 className="text-base md:text-lg font-bold text-gray-900 truncate">
+                {book.title}
+              </h1>
+              {book.author && (
+                <p className="text-xs text-gray-600 truncate hidden sm:block">
+                  by {book.author}
+                </p>
+              )}
+            </div>
+          </div>
+        );
+      }
+    }
+
+    // Books list page
+    if (location.pathname === "/books") {
+      return (
+        <div className="min-w-0">
+          <h1 className="text-lg md:text-xl font-bold text-gray-900">Books</h1>
+          <p className="text-xs text-gray-600">
+            {books.length} {books.length === 1 ? "book" : "books"}
+          </p>
+        </div>
+      );
+    }
+
+    // Create page route
+    if (location.pathname === "/create-page") {
+      return (
+        <div className="min-w-0">
+          <h1 className="text-lg md:text-xl font-bold text-gray-900">
+            Add New Page
+          </h1>
+          <p className="text-xs text-gray-600 hidden sm:block">
+            Upload and process a book page
+          </p>
+        </div>
+      );
+    }
+
+    // Vocabulary page
+    if (location.pathname === "/vocab") {
+      return (
+        <div className="min-w-0">
+          <h1 className="text-lg md:text-xl font-bold text-gray-900">
+            Vocabulary
+          </h1>
+          <p className="text-xs text-gray-600 hidden sm:block">
+            {settings.selectedLanguage === "all"
+              ? "All Languages"
+              : settings.selectedLanguage}
+          </p>
+        </div>
+      );
+    }
+
+    // Review page
+    if (location.pathname === "/review") {
+      return (
+        <div className="min-w-0">
+          <h1 className="text-lg md:text-xl font-bold text-gray-900">Review</h1>
+          <p className="text-xs text-gray-600 hidden sm:block">
+            {dueCount} word{dueCount !== 1 ? "s" : ""} due
+          </p>
+        </div>
+      );
+    }
+
+    // Review History page
+    if (location.pathname === "/review-history") {
+      return (
+        <div className="min-w-0">
+          <h1 className="text-lg md:text-xl font-bold text-gray-900">
+            Review History
+          </h1>
+          <p className="text-xs text-gray-600 hidden sm:block">
+            {settings.selectedLanguage === "all"
+              ? "All Languages"
+              : settings.selectedLanguage}
+          </p>
+        </div>
+      );
+    }
+
+    // Statistics page
+    if (location.pathname === "/stats") {
+      return (
+        <div className="min-w-0">
+          <h1 className="text-lg md:text-xl font-bold text-gray-900">
+            Statistics
+          </h1>
+          <p className="text-xs text-gray-600 hidden sm:block">
+            {settings.selectedLanguage === "all"
+              ? "All Languages"
+              : settings.selectedLanguage}
+          </p>
+        </div>
+      );
+    }
+
+    // Default fallback (home page with no specific route)
+    return (
+      <div className="min-w-0">
+        <h1 className="text-lg md:text-xl font-bold text-gray-900 truncate">
+          Language Learning Tool
+        </h1>
+        <p className="text-xs text-gray-600 hidden sm:block">
+          Learn languages by reading books
+        </p>
+      </div>
+    );
+  };
 
   return (
-    <div className="flex h-screen bg-white">
+    <div className="flex h-screen bg-white overflow-hidden">
+      {/* Sidebar Backdrop (Mobile) */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <Sidebar
         pages={pages}
         currentPageId={currentPage?.id || null}
         onSelectPage={handleSelectPage}
         onDeletePage={handleDeletePage}
-        onNewPage={handleNewPage}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        selectedLanguage={settings.selectedLanguage}
+        availableLanguages={availableLanguages}
+        onLanguageChange={handleLanguageChange}
+        dueCount={dueCount}
       />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-6 py-3">
-          <div className="flex items-center justify-between gap-4">
-            {/* Left: Book Details or Default Title */}
+        <header className="bg-white border-b border-gray-200 px-4 md:px-6 py-3">
+          <div className="flex items-center justify-between gap-2 md:gap-4">
+            {/* Left: Hamburger + Book Details or Default Title */}
             <div className="flex items-center gap-3">
-              {currentBook ? (
-                <>
-                  {currentBook.coverImageUrl && (
-                    <img
-                      src={currentBook.coverImageUrl}
-                      alt={currentBook.title}
-                      className="h-12 w-auto object-contain rounded shadow-sm"
-                    />
-                  )}
-                  <div>
-                    <h1 className="text-lg font-bold text-gray-900">
-                      {currentBook.title}
-                    </h1>
-                    {currentBook.author && (
-                      <p className="text-xs text-gray-600">
-                        by {currentBook.author}
-                      </p>
-                    )}
-                  </div>
-                </>
-              ) : (
-                <div>
-                  <h1 className="text-xl font-bold text-gray-900">
-                    Language Learning Tool
-                  </h1>
-                  <p className="text-xs text-gray-600">
-                    Learn languages by reading books
-                  </p>
-                </div>
-              )}
+              {/* Hamburger Menu Button */}
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
+                title={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              </button>
+              {/* Route-specific Header Content */}
+              {renderHeaderContent()}
             </div>
 
-            {/* Center: Page Gallery */}
-            {currentPage && (
-              <div className="flex-shrink-0">
+            {/* Center: Page Gallery (only on reader page) */}
+            {pageMatch && displayPage && (
+              <div className="flex flex-shrink-0">
                 <PageGallery
-                  currentPage={currentPage}
+                  currentPage={displayPage}
                   allPages={pages}
-                  onSelectPage={handleSelectPage}
+                  onSelectPage={(page) => {
+                    handleSelectPage(page);
+                    navigate(`/pages/${page.id}`);
+                  }}
                   onImageClick={() =>
-                    currentPage.imageDataUrl &&
-                    setFullscreenImage(currentPage.imageDataUrl)
+                    displayPage.imageDataUrl &&
+                    setFullscreenImage(displayPage.imageDataUrl)
                   }
                 />
               </div>
@@ -291,22 +613,97 @@ function App() {
           </div>
         </header>
 
-        {/* Content Area */}
-        <div className="flex-1 overflow-hidden">
+        {/* Content Area - Routes */}
+        <div className="flex-1 overflow-y-auto">
           {processingStep ? (
             <ProcessingScreen step={processingStep} />
-          ) : currentPage ? (
-            <TextDisplay page={currentPage} onWordClick={setSelectedWord} />
           ) : (
-            <PageUploadForm
-              onImageSelect={handleImageSelect}
-              isProcessing={false}
-              recentLanguages={settings.recentLanguages}
-              books={books}
-              onCreateBook={handleCreateBook}
-              defaultLanguage={pages.length > 0 ? pages[0].language : ""}
-              defaultBookId={pages.length > 0 ? pages[0].bookId : undefined}
-            />
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <ReaderPage
+                    pages={pages}
+                    onWordClick={handleWordClick}
+                    selectedWord={selectedWord}
+                  />
+                }
+              />
+              <Route
+                path="/pages/:pageId"
+                element={
+                  <ReaderPage
+                    pages={pages}
+                    onWordClick={handleWordClick}
+                    selectedWord={selectedWord}
+                  />
+                }
+              />
+              <Route
+                path="/books"
+                element={
+                  <BooksPage
+                    books={books}
+                    onCreateBook={handleCreateBook}
+                    onDeleteBook={handleDeleteBook}
+                    getPageCountForBook={getPageCountForBook}
+                  />
+                }
+              />
+              <Route
+                path="/books/:bookId"
+                element={
+                  <BookDetailPage
+                    books={books}
+                    pages={pages}
+                    onSelectPage={handleSelectPage}
+                    onDeletePage={handleDeletePage}
+                  />
+                }
+              />
+              <Route
+                path="/create-page"
+                element={
+                  <CreatePagePage
+                    onImageSelect={handleImageSelect}
+                    isProcessing={false}
+                    recentLanguages={settings.recentLanguages}
+                    books={books}
+                    onCreateBook={handleCreateBook}
+                    defaultLanguage={pages.length > 0 ? pages[0].language : ""}
+                    defaultBookId={
+                      pages.length > 0 ? pages[0].bookId : undefined
+                    }
+                  />
+                }
+              />
+              <Route
+                path="/vocab"
+                element={
+                  <VocabPage selectedLanguage={settings.selectedLanguage} />
+                }
+              />
+              <Route
+                path="/review"
+                element={
+                  <ReviewPage selectedLanguage={settings.selectedLanguage} />
+                }
+              />
+              <Route
+                path="/review-history"
+                element={
+                  <ReviewHistoryPage
+                    selectedLanguage={settings.selectedLanguage}
+                  />
+                }
+              />
+              <Route
+                path="/stats"
+                element={
+                  <StatsPage selectedLanguage={settings.selectedLanguage} />
+                }
+              />
+            </Routes>
           )}
         </div>
       </div>
@@ -339,6 +736,14 @@ function App() {
         />
       )}
     </div>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
   );
 }
 
