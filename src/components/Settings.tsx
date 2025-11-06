@@ -29,6 +29,7 @@ export const Settings: React.FC<SettingsProps> = ({
       nativeLanguage,
       recentLanguages: settings.recentLanguages,
       selectedLanguage: settings.selectedLanguage,
+      darkMode: settings.darkMode,
     });
     onClose();
   };
