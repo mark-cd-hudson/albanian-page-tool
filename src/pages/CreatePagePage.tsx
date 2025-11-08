@@ -5,10 +5,10 @@ import { Book } from "../types";
 
 interface CreatePagePageProps {
   onImageSelect: (data: {
-    dataUrl: string;
+    dataUrls: string[];
     language: string;
     bookId?: string;
-    pageNumber?: number;
+    startingPageNumber?: number;
   }) => void;
   isProcessing: boolean;
   recentLanguages: string[];
@@ -26,7 +26,7 @@ export const CreatePagePage: React.FC<CreatePagePageProps> = (props) => {
       {/* Back Button */}
       <button
         onClick={() => navigate("/")}
-        className="absolute top-4 left-4 z-10 p-2 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow text-gray-600 hover:text-gray-900"
+        className="absolute top-4 left-4 z-10 p-2 bg-white dark:bg-gray-900 rounded-lg shadow-md hover:shadow-lg transition-shadow text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white border border-transparent dark:border-gray-700"
         title="Back to reading"
       >
         <svg
