@@ -230,7 +230,10 @@ function AppContent() {
         // Step 1: Extract text
         setProcessingStep("extracting");
         const compressedImage = await compressImage(dataUrl);
-        const paragraphTexts = await claudeService.extractParagraphs(dataUrl);
+        const paragraphTexts = await claudeService.extractParagraphs(
+          dataUrl,
+          data.language
+        );
 
         if (paragraphTexts.length === 0) {
           alert(
@@ -285,7 +288,7 @@ function AppContent() {
 
       const updatedPages = await indexedDBService.getPages();
       setPages(updatedPages);
-      
+
       // Navigate to the last created page
       if (lastCreatedPageId) {
         const lastPage = updatedPages.find((p) => p.id === lastCreatedPageId);
@@ -708,8 +711,8 @@ function AppContent() {
         {/* Content Area - Routes */}
         <div className="flex-1 overflow-y-auto bg-white dark:bg-gray-950">
           {processingStep ? (
-            <ProcessingScreen 
-              step={processingStep} 
+            <ProcessingScreen
+              step={processingStep}
               currentPage={currentProcessingPage}
               totalPages={totalProcessingPages}
             />

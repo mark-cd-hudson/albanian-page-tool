@@ -11,15 +11,20 @@ export class ClaudeService {
     });
   }
 
-  async extractParagraphs(imageDataUrl: string): Promise<string[]> {
+  async extractParagraphs(imageDataUrl: string, language: string): Promise<string[]> {
     // Convert data URL to base64
     const base64Data = imageDataUrl.split(',')[1];
     const mediaType = imageDataUrl.split(';')[0].split(':')[1] as 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp';
 
-    // Use Sonnet 4.5 for vision tasks (required for image processing)
-    const message = await this.client.messages.create({
+    // Use Sonnet 4.5 for vision tasks with extended thinking for better accuracy
+    // Note: Extended thinking is not yet in the TypeScript types, so we use 'as any'
+    const message = await (this.client.messages.create as any)({
       model: 'claude-sonnet-4-5',
-      max_tokens: 4096,
+      max_tokens: 8192 * 2,
+      thinking: {
+        type: 'enabled',
+        budget_tokens: 8192
+      },
       messages: [
         {
           role: 'user',
@@ -34,19 +39,27 @@ export class ClaudeService {
             },
             {
               type: 'text',
-              text: 'Extract all text from this image. Preserve the paragraph structure - return each paragraph separated by two newlines (\\n\\n). Within each paragraph, keep all the text together. Only return the extracted text, nothing else.'
+              text: `Extract all text from this image. The text is in ${language}.
+
+Please carefully read the text and verify that the extracted words make sense in ${language}. First think of a transcription of the text, next analyze the transcription for errors. For example incorrect characters that don't fit the language, misspellings, incorrect joining of words, etc. If you notice any obvious OCR errors or character misrecognitions, correct them based on the context and what would be valid ${language} words.
+
+Preserve the paragraph structure - return each paragraph separated by two newlines (\\n\\n). Within each paragraph, keep all the text together.
+
+Only return the extracted text, nothing else.`
             }
           ],
         },
       ],
     });
 
-    const textContent = message.content[0];
-    if (textContent.type === 'text') {
+    // When using extended thinking, content array has [thinking, text]
+    // Find the text content block (skip thinking block)
+    const textContent = message.content.find((block: any) => block.type === 'text');
+    if (textContent && textContent.type === 'text') {
       return textContent.text
         .split('\n\n')
-        .map(p => p.trim())
-        .filter(p => p.length > 0);
+        .map((p: string) => p.trim())
+        .filter((p: string) => p.length > 0);
     }
     
     return [];
@@ -55,7 +68,7 @@ export class ClaudeService {
   async splitIntoSentences(paragraphText: string, language: string): Promise<string[]> {
     // Use Sonnet 4.5 for text-only tasks
     const message = await this.client.messages.create({
-      model: 'claude-sonnet-4-5',
+      model: 'claude-haiku-4-5',
       max_tokens: 2048,
       messages: [
         {
