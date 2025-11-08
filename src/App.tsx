@@ -54,6 +54,8 @@ function AppContent() {
   const [currentPage, setCurrentPage] = useState<PageData | null>(null);
   const [selectedWord, setSelectedWord] = useState<WordInfo | null>(null);
   const [processingStep, setProcessingStep] = useState<ProcessingStep>(null);
+  const [currentProcessingPage, setCurrentProcessingPage] = useState<number>(1);
+  const [totalProcessingPages, setTotalProcessingPages] = useState<number>(1);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(
     typeof window !== "undefined" ? window.innerWidth >= 1024 : true
@@ -196,10 +198,10 @@ function AppContent() {
   };
 
   const handleImageSelect = async (data: {
-    dataUrl: string;
+    dataUrls: string[];
     language: string;
     bookId?: string;
-    pageNumber?: number;
+    startingPageNumber?: number;
   }) => {
     if (!settings.apiKey) {
       alert("Please set your Anthropic API key in settings first.");
@@ -207,47 +209,66 @@ function AppContent() {
       return;
     }
 
+    const totalPages = data.dataUrls.length;
+    setTotalProcessingPages(totalPages);
+    let lastCreatedPageId: string | null = null;
+
     try {
       const claudeService = new ClaudeService(settings.apiKey);
 
-      // Step 1: Extract text
-      setProcessingStep("extracting");
-      const compressedImage = await compressImage(data.dataUrl);
-      const paragraphTexts = await claudeService.extractParagraphs(
-        data.dataUrl
-      );
+      // Process each image sequentially
+      for (let i = 0; i < data.dataUrls.length; i++) {
+        const dataUrl = data.dataUrls[i];
+        const currentPageNum = i + 1;
+        setCurrentProcessingPage(currentPageNum);
 
-      if (paragraphTexts.length === 0) {
-        alert(
-          "No text could be extracted from the image. Please try another image."
-        );
-        setProcessingStep(null);
-        return;
+        // Calculate page number for this image
+        const pageNumber = data.startingPageNumber
+          ? data.startingPageNumber + i
+          : undefined;
+
+        // Step 1: Extract text
+        setProcessingStep("extracting");
+        const compressedImage = await compressImage(dataUrl);
+        const paragraphTexts = await claudeService.extractParagraphs(dataUrl);
+
+        if (paragraphTexts.length === 0) {
+          alert(
+            `No text could be extracted from image ${currentPageNum} of ${totalPages}. Skipping this image.`
+          );
+          continue;
+        }
+
+        // Step 2: Split and translate
+        setProcessingStep("translating");
+        const processedParagraphs =
+          await claudeService.processParagraphsConcurrently(
+            paragraphTexts,
+            data.language,
+            settings.nativeLanguage
+          );
+
+        // Step 3: Save
+        setProcessingStep("saving");
+        const newPage: PageData = {
+          id: Date.now().toString() + "_" + i, // Add index to ensure unique IDs
+          imageDataUrl: compressedImage,
+          paragraphs: processedParagraphs,
+          timestamp: Date.now() + i, // Add small offset to maintain order
+          originalText: paragraphTexts.join("\n\n"),
+          language: data.language,
+          bookId: data.bookId,
+          pageNumber: pageNumber,
+        };
+
+        await indexedDBService.savePage(newPage);
+        lastCreatedPageId = newPage.id;
+
+        // Small delay between pages to avoid rate limiting
+        if (i < data.dataUrls.length - 1) {
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        }
       }
-
-      // Step 2: Split and translate
-      setProcessingStep("translating");
-      const processedParagraphs =
-        await claudeService.processParagraphsConcurrently(
-          paragraphTexts,
-          data.language,
-          settings.nativeLanguage
-        );
-
-      // Step 3: Save
-      setProcessingStep("saving");
-      const newPage: PageData = {
-        id: Date.now().toString(),
-        imageDataUrl: compressedImage,
-        paragraphs: processedParagraphs,
-        timestamp: Date.now(),
-        originalText: paragraphTexts.join("\n\n"),
-        language: data.language,
-        bookId: data.bookId,
-        pageNumber: data.pageNumber,
-      };
-
-      await indexedDBService.savePage(newPage);
 
       // Update recent languages
       const updatedRecentLanguages = [
@@ -264,17 +285,27 @@ function AppContent() {
 
       const updatedPages = await indexedDBService.getPages();
       setPages(updatedPages);
-      setCurrentPage(updatedPages[0]);
-      setProcessingStep(null);
+      
+      // Navigate to the last created page
+      if (lastCreatedPageId) {
+        const lastPage = updatedPages.find((p) => p.id === lastCreatedPageId);
+        if (lastPage) {
+          setCurrentPage(lastPage);
+          navigate(`/pages/${lastCreatedPageId}`);
+        }
+      }
 
-      // Navigate to the new page
-      navigate(`/pages/${newPage.id}`);
+      setProcessingStep(null);
+      setCurrentProcessingPage(1);
+      setTotalProcessingPages(1);
     } catch (error) {
-      console.error("Error processing image:", error);
+      console.error("Error processing images:", error);
       alert(
-        "An error occurred while processing the image. Please check your API key and try again."
+        "An error occurred while processing the images. Please check your API key and try again."
       );
       setProcessingStep(null);
+      setCurrentProcessingPage(1);
+      setTotalProcessingPages(1);
     }
   };
 
@@ -677,7 +708,11 @@ function AppContent() {
         {/* Content Area - Routes */}
         <div className="flex-1 overflow-y-auto bg-white dark:bg-gray-950">
           {processingStep ? (
-            <ProcessingScreen step={processingStep} />
+            <ProcessingScreen 
+              step={processingStep} 
+              currentPage={currentProcessingPage}
+              totalPages={totalProcessingPages}
+            />
           ) : (
             <Routes>
               <Route

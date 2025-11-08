@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 
 interface ImageUploadProps {
-  onImageSelect: (dataUrl: string) => void;
+  onImageSelect: (dataUrls: string[]) => void;
   isProcessing: boolean;
 }
 
@@ -11,16 +11,26 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const dataUrl = e.target?.result as string;
-      onImageSelect(dataUrl);
-    };
-    reader.readAsDataURL(file);
+    const dataUrls: string[] = [];
+    
+    // Read all files as data URLs
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const dataUrl = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          resolve(e.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+      });
+      dataUrls.push(dataUrl);
+    }
+    
+    onImageSelect(dataUrls);
   };
 
   return (
@@ -42,11 +52,11 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
               />
             </svg>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Upload a Page
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            Upload Pages
           </h2>
-          <p className="text-gray-600">
-            Upload an image of a page from your Albanian book to get started
+          <p className="text-gray-600 dark:text-gray-400">
+            Upload one or more images to add pages to your book
           </p>
         </div>
 
@@ -54,6 +64,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
           ref={fileInputRef}
           type="file"
           accept="image/*"
+          multiple
           onChange={handleFileChange}
           className="hidden"
           disabled={isProcessing}
@@ -89,7 +100,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
               Processing...
             </span>
           ) : (
-            "Choose Image"
+            "Choose Images"
           )}
         </button>
 

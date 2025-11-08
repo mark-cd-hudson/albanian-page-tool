@@ -5,10 +5,10 @@ import { compressImage } from "../utils/imageCompression";
 
 interface PageUploadFormProps {
   onImageSelect: (data: {
-    dataUrl: string;
+    dataUrls: string[];
     language: string;
     bookId?: string;
-    pageNumber?: number;
+    startingPageNumber?: number;
   }) => void;
   isProcessing: boolean;
   recentLanguages: string[];
@@ -28,7 +28,7 @@ export const PageUploadForm: React.FC<PageUploadFormProps> = ({
   defaultBookId = "",
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [imageDataUrl, setImageDataUrl] = useState<string | null>(null);
+  const [imageDataUrls, setImageDataUrls] = useState<string[]>([]);
   const [language, setLanguage] = useState<string>(defaultLanguage);
   const [customLanguage, setCustomLanguage] = useState<string>("");
   const [bookId, setBookId] = useState<string>(defaultBookId);
@@ -43,21 +43,31 @@ export const PageUploadForm: React.FC<PageUploadFormProps> = ({
     new Set([...recentLanguages, ...COMMON_LANGUAGES])
   );
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target?.files?.[0];
-    if (!file) return;
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target?.files;
+    if (!files || files.length === 0) return;
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const dataUrl = e.target?.result as string;
-      setImageDataUrl(dataUrl);
-    };
-    reader.readAsDataURL(file);
+    const dataUrls: string[] = [];
+    
+    // Read all files as data URLs
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const dataUrl = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          resolve(e.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+      });
+      dataUrls.push(dataUrl);
+    }
+    
+    setImageDataUrls(dataUrls);
   };
 
   const handleSubmit = async () => {
-    if (!imageDataUrl) {
-      alert("Please select an image first");
+    if (imageDataUrls.length === 0) {
+      alert("Please select at least one image");
       return;
     }
 
@@ -79,14 +89,14 @@ export const PageUploadForm: React.FC<PageUploadFormProps> = ({
     }
 
     onImageSelect({
-      dataUrl: imageDataUrl,
+      dataUrls: imageDataUrls,
       language: selectedLanguage,
       bookId: finalBookId || undefined,
-      pageNumber: pageNumber ? parseInt(pageNumber) : undefined,
+      startingPageNumber: pageNumber ? parseInt(pageNumber) : undefined,
     });
 
     // Reset form (keeping defaults for language and book)
-    setImageDataUrl(null);
+    setImageDataUrls([]);
     setLanguage(defaultLanguage);
     setCustomLanguage("");
     setBookId(defaultBookId);
@@ -142,23 +152,35 @@ export const PageUploadForm: React.FC<PageUploadFormProps> = ({
               />
             </svg>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Upload a Page
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            Upload Pages
           </h2>
-          <p className="text-gray-600">
-            Upload an image of a page from a book to get started
+          <p className="text-gray-600 dark:text-gray-400">
+            Upload one or more images to add pages to your book
           </p>
         </div>
 
         {/* Image Preview */}
-        {imageDataUrl && (
+        {imageDataUrls.length > 0 && (
           <div className="mb-6">
-            <img
-              src={imageDataUrl}
-              alt="Preview"
-              className="max-w-full h-auto mx-auto rounded-lg shadow-md"
-              style={{ maxHeight: "200px" }}
-            />
+            <div className="text-center text-sm text-gray-600 dark:text-gray-400 mb-2">
+              {imageDataUrls.length} {imageDataUrls.length === 1 ? "image" : "images"} selected
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {imageDataUrls.slice(0, 3).map((url, i) => (
+                <img
+                  key={i}
+                  src={url}
+                  alt={`Preview ${i + 1}`}
+                  className="w-full h-24 object-cover rounded-lg shadow-md"
+                />
+              ))}
+            </div>
+            {imageDataUrls.length > 3 && (
+              <div className="text-center text-xs text-gray-500 dark:text-gray-400 mt-2">
+                +{imageDataUrls.length - 3} more
+              </div>
+            )}
           </div>
         )}
 
@@ -169,6 +191,7 @@ export const PageUploadForm: React.FC<PageUploadFormProps> = ({
               ref={fileInputRef}
               type="file"
               accept="image/*"
+              multiple
               onChange={handleFileChange}
               className="hidden"
               disabled={isProcessing}
@@ -176,13 +199,13 @@ export const PageUploadForm: React.FC<PageUploadFormProps> = ({
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={isProcessing}
-              className="w-full py-3 px-6 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors disabled:bg-gray-50 disabled:cursor-not-allowed"
+              className="w-full py-3 px-6 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors disabled:bg-gray-50 disabled:cursor-not-allowed"
             >
-              {imageDataUrl ? "Change Image" : "Choose Image"}
+              {imageDataUrls.length > 0 ? "Change Images" : "Choose Images"}
             </button>
           </div>
 
-          {imageDataUrl && (
+          {imageDataUrls.length > 0 && (
             <>
               {/* Language Selection */}
               <div>
@@ -317,8 +340,8 @@ export const PageUploadForm: React.FC<PageUploadFormProps> = ({
 
               {/* Page Number */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Page Number (Optional)
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {imageDataUrls.length > 1 ? "Starting Page Number (Optional)" : "Page Number (Optional)"}
                 </label>
                 <input
                   type="number"

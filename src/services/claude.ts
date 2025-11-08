@@ -53,9 +53,9 @@ export class ClaudeService {
   }
 
   async splitIntoSentences(paragraphText: string, language: string): Promise<string[]> {
-    // Use Haiku 4.5 for text-only tasks (faster and more cost-effective)
+    // Use Sonnet 4.5 for text-only tasks
     const message = await this.client.messages.create({
-      model: 'claude-haiku-4-5',
+      model: 'claude-sonnet-4-5',
       max_tokens: 2048,
       messages: [
         {
@@ -79,9 +79,9 @@ Text: "${paragraphText}"`
   }
 
   async translateSentenceAndWords(sentence: string, sourceLanguage: string, targetLanguage: string): Promise<Sentence> {
-    // Use Haiku 4.5 for text-only tasks (faster and more cost-effective)
+    // Use Sonnet 4.5 for text-only tasks
     const message = await this.client.messages.create({
-      model: 'claude-haiku-4-5',
+      model: 'claude-sonnet-4-5',
       max_tokens: 2048,
       messages: [
         {
