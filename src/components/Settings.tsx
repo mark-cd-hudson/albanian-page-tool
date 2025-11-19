@@ -160,18 +160,18 @@ export const Settings: React.FC<SettingsProps> = ({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Anthropic API Key
+                  Google Gemini API Key
                 </label>
                 <input
                   type="password"
                   value={newApiKey}
                   onChange={(e) => setNewApiKey(e.target.value)}
-                  placeholder="sk-ant-..."
+                  placeholder="AIza..."
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#9C7556] dark:focus:ring-[#8B6F47] focus:border-[#9C7556] dark:focus:border-[#8B6F47] outline-none"
                 />
                 <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
                   Your API key is stored locally in your browser and never sent
-                  anywhere except to Anthropic.
+                  anywhere except to Google.
                 </p>
               </div>
 
@@ -193,12 +193,12 @@ export const Settings: React.FC<SettingsProps> = ({
                     <p>
                       Visit{" "}
                       <a
-                        href="https://console.anthropic.com/"
+                        href="https://aistudio.google.com/app/apikey"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="underline"
                       >
-                        console.anthropic.com
+                        aistudio.google.com
                       </a>{" "}
                       to get your API key
                     </p>

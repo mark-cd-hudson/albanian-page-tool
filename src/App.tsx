@@ -22,7 +22,7 @@ import { ReviewHistoryPage } from "./pages/ReviewHistoryPage";
 import { StatsPage } from "./pages/StatsPage";
 import { ProcessingScreen } from "./components/ProcessingScreen";
 import { PageGallery } from "./components/PageGallery";
-import { ClaudeService } from "./services/claude";
+import { GeminiService } from "./services/gemini";
 import { indexedDBService } from "./services/indexedDB";
 import { fsrsService } from "./services/fsrs";
 import { PageData, WordInfo, AppSettings, Book, VocabContext } from "./types";
@@ -204,7 +204,7 @@ function AppContent() {
     startingPageNumber?: number;
   }) => {
     if (!settings.apiKey) {
-      alert("Please set your Anthropic API key in settings first.");
+      alert("Please set your Google Gemini API key in settings first.");
       setShowSettings(true);
       return;
     }
@@ -214,7 +214,7 @@ function AppContent() {
     let lastCreatedPageId: string | null = null;
 
     try {
-      const claudeService = new ClaudeService(settings.apiKey);
+      const geminiService = new GeminiService(settings.apiKey);
 
       // Process each image sequentially
       for (let i = 0; i < data.dataUrls.length; i++) {
@@ -230,7 +230,7 @@ function AppContent() {
         // Step 1: Extract text
         setProcessingStep("extracting");
         const compressedImage = await compressImage(dataUrl);
-        const paragraphTexts = await claudeService.extractParagraphs(
+        const paragraphTexts = await geminiService.extractParagraphs(
           dataUrl,
           data.language
         );
@@ -245,7 +245,7 @@ function AppContent() {
         // Step 2: Split and translate
         setProcessingStep("translating");
         const processedParagraphs =
-          await claudeService.processParagraphsConcurrently(
+          await geminiService.processParagraphsConcurrently(
             paragraphTexts,
             data.language,
             settings.nativeLanguage
